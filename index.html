@@ -72,15 +72,12 @@
     }
 
     function findReplacement() {
-      let input = document.getElementById('isbnInput').value.trim();
+      const input = document.getElementById('isbnInput').value.trim();
 
       if (!input) {
         document.getElementById('result').textContent = "Please enter an ISBN number.";
         return;
       }
-
-      // Automatically add "ISBN" prefix to match JSON keys
-      const key = "ISBN" + input;
 
       const resultDiv = document.getElementById('result');
 
@@ -89,8 +86,8 @@
         return;
       }
 
-      if (isbnMap[key]) {
-        resultDiv.textContent = `Replacement ISBN: ${isbnMap[key]}`;
+      if (isbnMap[input]) {
+        resultDiv.textContent = `Replacement ISBN: ${isbnMap[input]}`;
       } else {
         resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
