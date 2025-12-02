@@ -52,16 +52,24 @@
   <script>
     let isbnMap = {};
 
-    // Load the JSON file
-    fetch('isbn_data.json')
-      .then(response => response.json())
-      .then(data => {
-        isbnMap = data;
-      })
-      .catch(error => {
-        console.error("Error loading ISBN data:", error);
-        document.getElementById('result').textContent = "Error loading ISBN data.";
-      });
+    // Load JSON with cache-busting (important on GitHub Pages)
+    function loadISBNData() {
+      const timestamp = new Date().getTime(); // avoids caching
+      fetch(`isbn_data.json?t=${timestamp}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+        })
+        .then(data => {
+          isbnMap = data;
+          console.log("ISBN data loaded successfully.");
+        })
+        .catch(error => {
+          console.error("Error loading ISBN data:", error);
+          document.getElementById('result').textContent =
+            "Error loading ISBN data. Please check your files.";
+        });
+    }
 
     function findReplacement() {
       const input = document.getElementById('isbnInput').value.trim();
@@ -72,12 +80,20 @@
         return;
       }
 
+      if (!isbnMap || Object.keys(isbnMap).length === 0) {
+        resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
+        return;
+      }
+
       if (isbnMap[input]) {
         resultDiv.textContent = `Replacement ISBN: ${isbnMap[input]}`;
       } else {
         resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
     }
+
+    // Load JSON when page loads
+    window.onload = loadISBNData;
   </script>
 
 </body>
