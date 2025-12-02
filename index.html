@@ -22,7 +22,7 @@
 
     input[type="text"] {
       padding: 10px;
-      width: 200px;
+      width: 250px;
       font-size: 16px;
       margin-right: 10px;
     }
@@ -44,7 +44,7 @@
 
   <h1>ISBN Replacement Finder</h1>
   <div>
-    <input type="text" id="isbnInput" placeholder="Enter ISBN number only">
+    <input type="text" id="isbnInput" placeholder="Enter ISBN number">
     <button onclick="findReplacement()">Search</button>
   </div>
   <div id="result"></div>
@@ -79,8 +79,8 @@
         return;
       }
 
-      // Automatically add "ISBN" prefix
-      input = "ISBN" + input;
+      // Automatically add "ISBN" prefix to match JSON keys
+      const key = "ISBN" + input;
 
       const resultDiv = document.getElementById('result');
 
@@ -89,13 +89,14 @@
         return;
       }
 
-      if (isbnMap[input]) {
-        resultDiv.textContent = `Replacement ISBN: ${isbnMap[input]}`;
+      if (isbnMap[key]) {
+        resultDiv.textContent = `Replacement ISBN: ${isbnMap[key]}`;
       } else {
         resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
     }
 
+    // Load JSON when page loads
     window.onload = loadISBNData;
   </script>
 
