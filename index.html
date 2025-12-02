@@ -44,7 +44,7 @@
       font-size: 28px; /* bigger */
       color: red;      /* red color */
       font-weight: bold;
-      margin-top: 10px;
+      margin: 0 5px;   /* small margin around it */
     }
     
   </style>
@@ -82,13 +82,12 @@
 
     function findReplacement() {
       const input = document.getElementById('isbnInput').value.trim();
+      const resultDiv = document.getElementById('result');
 
       if (!input) {
-        document.getElementById('result').textContent = "Please enter an ISBN number.";
+        resultDiv.textContent = "Please enter an ISBN number.";
         return;
       }
-
-      const resultDiv = document.getElementById('result');
 
       if (!isbnMap || Object.keys(isbnMap).length === 0) {
         resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
@@ -96,7 +95,7 @@
       }
 
       if (isbnMap[input]) {
-        resultDiv.innerHTML = `Please use the replacement ISBN <span class="replacement">${isbnMap[inputISBN]}</span> for billing.`;
+        resultDiv.innerHTML = `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
       } else {
         resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
@@ -108,7 +107,3 @@
 
 </body>
 </html>
-
-
-
-
