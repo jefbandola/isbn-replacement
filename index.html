@@ -1,113 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ISBN Replacement Lookup</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISBN Replacement Finder</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 30px;
-      max-width: 500px;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
 
-    input {
-      width: 100%;
+    h2 {
+      color: #333;
+    }
+
+    input[type="text"] {
       padding: 10px;
-      font-size: 18px;
-      margin-bottom: 10px;
+      width: 250px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
 
     #result {
       margin-top: 20px;
-      font-size: 20px;
+      font-size: 18px;
+      color: #0077cc;
     }
-
+    
+    /* New style for replacement ISBN */
     .replacement {
-      color: red;
-      font-size: 28px;
+      font-size: 28px; /* bigger */
+      color: red;      /* red color */
       font-weight: bold;
+      margin: 0 5px;   /* small margin around it */
     }
+    
   </style>
 </head>
-
 <body>
 
-  <h2>ISBN Replacement Search</h2>
-
-  <input 
-    id="isbnInput" 
-    type="text" 
-    placeholder="Enter ISBN number (e.g. 9781473774667)" 
-    autocomplete="off"
-  />
-
+  <h2>ISBN Replacement Finder</h2>
+  <div>
+    <input type="text" id="isbnInput" placeholder="Enter ISBN number">
+    <button onclick="findReplacement()">Search</button>
+  </div>
   <div id="result"></div>
 
   <script>
-    /***********************
-     * Load ISBN JSON
-     ***********************/
-    const isbnMap = {};
+    let isbnMap = {};
 
-    fetch("isbn.json")
-      .then(response => response.json())
-      .then(data => {
-        Object.keys(data).forEach(key => {
-          const normalized = key.replace(/[^0-9X]/gi, "");
-          isbnMap[normalized] = data[key];
+    // Load JSON with cache-busting
+    function loadISBNData() {
+      const timestamp = new Date().getTime();
+      fetch(`isbn_data.json?t=${timestamp}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+        })
+        .then(data => {
+          isbnMap = data;
+          console.log("ISBN data loaded successfully:", isbnMap);
+        })
+        .catch(error => {
+          console.error("Error loading ISBN data:", error);
+          document.getElementById('result').textContent =
+            "Error loading ISBN data. Please check your files.";
         });
-      });
-
-    /***********************
-     * Search Function
-     ***********************/
-    document.getElementById("isbnInput").addEventListener("input", () => {
-      resetInactivityTimer();
-
-      const input = document.getElementById("isbnInput").value.replace(/[^0-9X]/gi, "");
-      const resultDiv = document.getElementById("result");
-
-      if (isbnMap[input]) {
-        resultDiv.innerHTML =
-          `Please use <span class="replacement">${isbnMap[input]}</span> for billing.`;
-      } else if (input.length > 5) {
-        resultDiv.textContent = "No replacement ISBN found.";
-      } else {
-        resultDiv.textContent = "";
-      }
-    });
-
-    /***********************
-     * Inactivity Auto-Refresh
-     ***********************/
-    let inactivityTimer;
-
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-
-        // Clear input and results
-        document.getElementById("isbnInput").value = "";
-        document.getElementById("result").textContent = "";
-
-        // Clear saved history if any
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Refresh page
-        location.reload();
-      }, 60000); // 1 minute
     }
 
-    // Detect user activity
-    ["mousemove","keypress","click","scroll","touchstart"].forEach(event => {
-      document.addEventListener(event, resetInactivityTimer);
-    });
+    function findReplacement() {
+      const input = document.getElementById('isbnInput').value.trim();
+      const resultDiv = document.getElementById('result');
 
-    // Start timer on page load
-    resetInactivityTimer();
+      if (!input) {
+        resultDiv.textContent = "Please enter an ISBN number.";
+        return;
+      }
+
+      if (!isbnMap || Object.keys(isbnMap).length === 0) {
+        resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
+        return;
+      }
+
+      if (isbnMap[input]) {
+        resultDiv.innerHTML = `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
+      } else {
+        resultDiv.textContent = `No replacement ISBN found for ${input}`;
+      }
+    }
+
+    // Load JSON when page loads
+    window.onload = loadISBNData;
   </script>
 
 </body>
