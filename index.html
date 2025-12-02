@@ -96,7 +96,7 @@
       }
 
       if (isbnMap[input]) {
-        resultDiv.textContent = `The replacement ISBN for billing is: ${isbnMap[input]}`;
+        resultDiv.innerHTML = `Please use the replacement ISBN <span class="replacement">${isbnMap[inputISBN]}</span> for billing.`;
       } else {
         resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
@@ -108,6 +108,7 @@
 
 </body>
 </html>
+
 
 
 
