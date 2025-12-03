@@ -38,22 +38,23 @@
       font-size: 18px;
       color: #0077cc;
     }
-    
-    /* New style for replacement ISBN */
+
     .replacement {
-      font-size: 28px; /* bigger */
-      color: red;      /* red color */
+      font-size: 28px;
+      color: red;
       font-weight: bold;
-      margin: 0 5px;   /* small margin around it */
+      margin: 0 5px;
     }
-    
   </style>
 </head>
 <body>
 
   <h2>ISBN Replacement Finder</h2>
   <div>
-    <input type="text" id="isbnInput" placeholder="Enter ISBN number">
+    <!-- Auto-suggest list -->
+    <input list="isbnList" type="text" id="isbnInput" placeholder="Enter ISBN number">
+    <datalist id="isbnList"></datalist>
+
     <button onclick="findReplacement()">Search</button>
   </div>
   <div id="result"></div>
@@ -71,7 +72,17 @@
         })
         .then(data => {
           isbnMap = data;
-          console.log("ISBN data loaded successfully:", isbnMap);
+          console.log("ISBN data loaded successfully");
+
+          // Populate the datalist for auto-suggest
+          const list = document.getElementById("isbnList");
+          list.innerHTML = "";
+
+          Object.keys(isbnMap).forEach(isbn => {
+            const option = document.createElement("option");
+            option.value = isbn;
+            list.appendChild(option);
+          });
         })
         .catch(error => {
           console.error("Error loading ISBN data:", error);
@@ -79,6 +90,11 @@
             "Error loading ISBN data. Please check your files.";
         });
     }
+
+    // Validate numeric input only
+    document.getElementById("isbnInput").addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9]/g, "");  // allow digits only
+    });
 
     function findReplacement() {
       const input = document.getElementById('isbnInput').value.trim();
@@ -89,21 +105,17 @@
         return;
       }
 
+      // Ensure it's numeric
+      if (!/^[0-9]+$/.test(input)) {
+        resultDiv.textContent = "Invalid input. ISBN must contain numbers only.";
+        return;
+      }
+
       if (!isbnMap || Object.keys(isbnMap).length === 0) {
         resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
         return;
       }
 
       if (isbnMap[input]) {
-        resultDiv.innerHTML = `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
-      } else {
-        resultDiv.textContent = `No replacement ISBN found for ${input}`;
-      }
-    }
-
-    // Load JSON when page loads
-    window.onload = loadISBNData;
-  </script>
-
-</body>
-</html>
+        resultDiv.innerHTML =
+          `Please use the replacement ISBN <span
