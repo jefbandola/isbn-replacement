@@ -118,4 +118,15 @@
 
       if (isbnMap[input]) {
         resultDiv.innerHTML =
-          `Please use the replacement ISBN <span
+          `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
+      } else {
+        resultDiv.textContent = `No replacement ISBN found for ${input}`;
+      }
+    }
+
+    // Load JSON when page loads
+    window.onload = loadISBNData;
+  </script>
+
+</body>
+</html>
