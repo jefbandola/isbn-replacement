@@ -4,130 +4,77 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ISBN Replacement Finder</title>
+  <script src="https://cdn.jsdelivr.net/npm/json5@2/dist/index.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      background-color: #f7f7fb;
+      padding: 20px;
     }
-
-    h2 {
-      color: #333;
-    }
-
-    input[type="text"] {
+    input, button {
+      font-size: 16px;
       padding: 10px;
-      width: 250px;
-      font-size: 16px;
-      margin-right: 10px;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 350px;
     }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #result {
+    #message {
       margin-top: 20px;
       font-size: 18px;
-      color: #0077cc;
-    }
-
-    .replacement {
-      font-size: 28px;
-      color: red;
       font-weight: bold;
-      margin: 0 5px;
     }
   </style>
 </head>
 <body>
 
   <h2>ISBN Replacement Finder</h2>
-  <div>
-    <!-- Auto-suggest list -->
-    <input list="isbnList" type="text" id="isbnInput" placeholder="Enter ISBN number">
-    <datalist id="isbnList"></datalist>
 
-    <button onclick="findReplacement()">Search</button>
-  </div>
-  <div id="result"></div>
+  <input type="text" id="isbnInput" placeholder="Enter ISBN number">
+  <button onclick="searchISBN()">Search</button>
 
-  <!-- ⭐ JSON5 PARSER CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/json5@2/dist/index.min.js"></script>
+  <div id="message"></div>
 
   <script>
-    let isbnMap = {};
+    // JSON5 allows comments + trailing commas
+    const isbnDataJSON5 = `
+    {
+      // Old ISBN : Replacement ISBN
+      "1234": "5678",
+      "1111": "2222",
+      "5555": "9999",
+      // This one doesn't exist in replacements
+      "8888": null,
+    }`;
 
-    // Load JSON5 safely using JSON5 parser
-    function loadISBNData() {
-      const timestamp = new Date().getTime();
-      fetch(`isbn_data.json5?t=${timestamp}`)
-        .then(response => {
-          if (!response.ok) throw new Error('Network response was not ok');
-          return response.text();   // read as text
-        })
-        .then(text => {
-          // ⭐ Parse JSON5 (supports comments, trailing commas, etc.)
-          isbnMap = JSON5.parse(text);
-          console.log("JSON5 ISBN data loaded");
+    // Parse JSON5
+    const isbnData = JSON5.parse(isbnDataJSON5);
 
-          const list = document.getElementById("isbnList");
-          list.innerHTML = "";
+    function searchISBN() {
+      const input = document.getElementById("isbnInput").value.trim();
+      const messageDiv = document.getElementById("message");
 
-          Object.keys(isbnMap).forEach(isbn => {
-            const option = document.createElement("option");
-            option.value = isbn;
-            list.appendChild(option);
-          });
-        })
-        .catch(error => {
-          console.error("Error loading ISBN data:", error);
-          document.getElementById('result').textContent =
-            "Error loading ISBN data. Please check your files.";
-        });
-    }
-
-    // numeric validation
-    document.getElementById("isbnInput").addEventListener("input", function () {
-      this.value = this.value.replace(/[^0-9]/g, "");
-    });
-
-    function findReplacement() {
-      const input = document.getElementById('isbnInput').value.trim();
-      const resultDiv = document.getElementById('result');
-
-      if (!input) {
-        resultDiv.textContent = "Please enter an ISBN number.";
-        return;
-      }
-
+      // Validate numeric input
       if (!/^[0-9]+$/.test(input)) {
-        resultDiv.textContent = "Invalid input. ISBN must contain numbers only.";
+        messageDiv.innerHTML = "❌ ISBN must contain numbers only.";
+        messageDiv.style.color = "red";
         return;
       }
 
-      if (!isbnMap || Object.keys(isbnMap).length === 0) {
-        resultDiv.textContent = "ISBN data is still loading. Please try again later.";
-        return;
-      }
-
-      if (isbnMap[input]) {
-        resultDiv.innerHTML =
-          `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
+      // Look up ISBN
+      if (input in isbnData && isbnData[input]) {
+        messageDiv.innerHTML = `✅ Please use replacement ISBN <strong>${isbnData[input]}</strong> for billing.`;
+        messageDiv.style.color = "green";
       } else {
-        resultDiv.textContent = `No replacement ISBN found for ${input}`;
+
+        /** ⭐ CUSTOM MESSAGE IF NO REPLACEMENT ⭐ */
+        messageDiv.innerHTML = `
+          ⚠️ No replacement ISBN found.<br>
+          <small>
+            Please contact Tech or verify with Operation before proceeding.
+          </small>`;
+        messageDiv.style.color = "#cc8800";
       }
     }
-
-    // load json5 on page load
-    window.onload = loadISBNData;
   </script>
 
 </body>
