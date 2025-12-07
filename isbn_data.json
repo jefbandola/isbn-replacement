@@ -1,4 +1,9 @@
+// ISBN Replacement Data
+// Keys = old ISBN
+// Values = new ISBN or status text
+
 {
+  // ===== Replacement ISBNs =====
   "9781473774667": "9781473774681",
   "9798214479491": "9798214185156",
   "9780357022191": "9780357688281",
@@ -23,22 +28,16 @@
   "9781337684651": "9781337296977",
   "9781305883826": "9780357636893",
   "9781337771870": "9781305729780",
-  "9781337785310": "Un-Tag",
+  "9781337919487": "9781337919500",
+
+  // ===== Special Status Codes =====
+  // These are NOT replacement ISBNs, they require action or cleanup
+
+  "9781337785310": "Un-Tag",          // Remove tag, status pending
   "9780357984123": "Un-Tag",
-  "9798214002866": "To Active",
-  "9780357126592": "Lift Restriction",
+  "9798214002866": "To Active",       // Should be activated
+  "9780357126592": "Lift Restriction",// Remove existing restriction
   "9780357382370": "Lift Restriction",
   "9781337939782": "Lift Restriction",
-  "9781337939799": "Lift Restriction",
-  "9781337919487": "9781337919500"
+  "9781337939799": "Lift Restriction"
 }
-
-
-
-
-
-
-
-
-
-
