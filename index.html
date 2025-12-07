@@ -46,34 +46,35 @@
       margin: 0 5px;
     }
   </style>
-
-  <!-- JSON5 browser parser -->
-  <script src="https://cdn.jsdelivr.net/npm/json5@2.2.3/dist/index.min.js"></script>
-
 </head>
 <body>
 
   <h2>ISBN Replacement Finder</h2>
   <div>
+    <!-- Auto-suggest list -->
     <input list="isbnList" type="text" id="isbnInput" placeholder="Enter ISBN number">
     <datalist id="isbnList"></datalist>
+
     <button onclick="findReplacement()">Search</button>
   </div>
-
   <div id="result"></div>
 
   <script>
     let isbnMap = {};
 
+    // Load JSON with cache-busting
     function loadISBNData() {
       const timestamp = new Date().getTime();
+      fetch(`isbn_data.json?t=${timestamp}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.json();
+        })
+        .then(data => {
+          isbnMap = data;
+          console.log("ISBN data loaded successfully");
 
-      fetch(`isbn_data.json5?t=${timestamp}`)
-        .then(response => response.text())
-        .then(text => {
-          isbnMap = JSON5.parse(text);
-
-          // Populate auto-suggest
+          // Populate the datalist for auto-suggest
           const list = document.getElementById("isbnList");
           list.innerHTML = "";
 
@@ -83,48 +84,47 @@
             list.appendChild(option);
           });
         })
-        .catch(err => {
-          console.error(err);
-          document.getElementById("result").textContent =
-            "Error loading JSON5 data. Please check isbn_data.json5.";
+        .catch(error => {
+          console.error("Error loading ISBN data:", error);
+          document.getElementById('result').textContent =
+            "Error loading ISBN data. Please check your files.";
         });
     }
 
-    // Allow only digits in search box
+    // Validate numeric input only
     document.getElementById("isbnInput").addEventListener("input", function () {
-      this.value = this.value.replace(/[^0-9]/g, "");
+      this.value = this.value.replace(/[^0-9]/g, "");  // allow digits only
     });
 
     function findReplacement() {
-      const input = document.getElementById("isbnInput").value.trim();
-      const resultDiv = document.getElementById("result");
+      const input = document.getElementById('isbnInput').value.trim();
+      const resultDiv = document.getElementById('result');
 
       if (!input) {
         resultDiv.textContent = "Please enter an ISBN number.";
         return;
       }
 
-      if (!isbnMap[input]) {
-        resultDiv.textContent = `No replacement or status found for ${input}`;
+      // Ensure it's numeric
+      if (!/^[0-9]+$/.test(input)) {
+        resultDiv.textContent = "Invalid input. ISBN must contain numbers only.";
         return;
       }
 
-      const value = isbnMap[input];
+      if (!isbnMap || Object.keys(isbnMap).length === 0) {
+        resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
+        return;
+      }
 
-      // ✔️ Check if value is a real ISBN (all digits)
-      if (/^[0-9]+$/.test(value)) {
+      if (isbnMap[input]) {
         resultDiv.innerHTML =
-          `Please use the replacement ISBN <span class="replacement">${value}</span> for billing.`;
-        return;
+          `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
+      } else {
+        resultDiv.textContent = `No replacement ISBN found for ${input}`;
       }
-
-      // ✔️ Otherwise, treat as status
-      resultDiv.innerHTML = `
-        <span style="color:red;font-weight:bold;">Status detected: ${value}</span><br><br>
-        Please contact Tech Support regarding this order.
-      `;
     }
 
+    // Load JSON when page loads
     window.onload = loadISBNData;
   </script>
 
