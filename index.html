@@ -62,19 +62,23 @@
   <script>
     let isbnMap = {};
 
-    // Load JSON with cache-busting
+    // ⭐ CHANGED — custom JSON5 loader
     function loadISBNData() {
       const timestamp = new Date().getTime();
-      fetch(`isbn_data.json?t=${timestamp}`)
+      fetch(`isbn_data.json5?t=${timestamp}`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not ok');
-          return response.json();
+          return response.text();   // ⭐ read as text
         })
-        .then(data => {
-          isbnMap = data;
-          console.log("ISBN data loaded successfully");
+        .then(text => {
+          // ⭐ Remove JSON5 comments: lines starting with //
+          const cleaned = text.replace(/\/\/.*$/gm, "");
 
-          // Populate the datalist for auto-suggest
+          // ⭐ Parse as JSON
+          isbnMap = JSON.parse(cleaned);
+
+          console.log("JSON5 ISBN data loaded");
+
           const list = document.getElementById("isbnList");
           list.innerHTML = "";
 
@@ -93,7 +97,7 @@
 
     // Validate numeric input only
     document.getElementById("isbnInput").addEventListener("input", function () {
-      this.value = this.value.replace(/[^0-9]/g, "");  // allow digits only
+      this.value = this.value.replace(/[^0-9]/g, "");
     });
 
     function findReplacement() {
@@ -105,7 +109,6 @@
         return;
       }
 
-      // Ensure it's numeric
       if (!/^[0-9]+$/.test(input)) {
         resultDiv.textContent = "Invalid input. ISBN must contain numbers only.";
         return;
@@ -124,7 +127,7 @@
       }
     }
 
-    // Load JSON when page loads
+    // Load JSON5 when page loads
     window.onload = loadISBNData;
   </script>
 
