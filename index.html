@@ -59,24 +59,23 @@
   </div>
   <div id="result"></div>
 
+  <!-- ⭐ JSON5 PARSER CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/json5@2/dist/index.min.js"></script>
+
   <script>
     let isbnMap = {};
 
-    // ⭐ CHANGED — custom JSON5 loader
+    // Load JSON5 safely using JSON5 parser
     function loadISBNData() {
       const timestamp = new Date().getTime();
       fetch(`isbn_data.json5?t=${timestamp}`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not ok');
-          return response.text();   // ⭐ read as text
+          return response.text();   // read as text
         })
         .then(text => {
-          // ⭐ Remove JSON5 comments: lines starting with //
-          const cleaned = text.replace(/\/\/.*$/gm, "");
-
-          // ⭐ Parse as JSON
-          isbnMap = JSON.parse(cleaned);
-
+          // ⭐ Parse JSON5 (supports comments, trailing commas, etc.)
+          isbnMap = JSON5.parse(text);
           console.log("JSON5 ISBN data loaded");
 
           const list = document.getElementById("isbnList");
@@ -95,7 +94,7 @@
         });
     }
 
-    // Validate numeric input only
+    // numeric validation
     document.getElementById("isbnInput").addEventListener("input", function () {
       this.value = this.value.replace(/[^0-9]/g, "");
     });
@@ -115,7 +114,7 @@
       }
 
       if (!isbnMap || Object.keys(isbnMap).length === 0) {
-        resultDiv.textContent = "ISBN data is still loading. Please try again in a moment.";
+        resultDiv.textContent = "ISBN data is still loading. Please try again later.";
         return;
       }
 
@@ -127,7 +126,7 @@
       }
     }
 
-    // Load JSON5 when page loads
+    // load json5 on page load
     window.onload = loadISBNData;
   </script>
 
