@@ -62,22 +62,18 @@
   <script>
     let isbnMap = {};
 
-    // ⭐ CHANGED — custom JSON5 loader
+    // ⭐ JSON5 loader
     function loadISBNData() {
       const timestamp = new Date().getTime();
       fetch(`isbn_data.json5?t=${timestamp}`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not ok');
-          return response.text();   // ⭐ read as text
+          return response.text();
         })
         .then(text => {
-          // ⭐ Remove JSON5 comments: lines starting with //
+          // ⭐ Remove JSON5 comments
           const cleaned = text.replace(/\/\/.*$/gm, "");
-
-          // ⭐ Parse as JSON
           isbnMap = JSON.parse(cleaned);
-
-          console.log("JSON5 ISBN data loaded");
 
           const list = document.getElementById("isbnList");
           list.innerHTML = "";
@@ -120,6 +116,13 @@
       }
 
       if (isbnMap[input]) {
+
+        // ⭐ NEW — check if the value is numeric
+        if (!/^[0-9]+$/.test(isbnMap[input])) {
+          resultDiv.textContent = "Please contact Tech Support";
+          return;
+        }
+
         resultDiv.innerHTML =
           `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
       } else {
