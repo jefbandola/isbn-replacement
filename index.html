@@ -119,14 +119,14 @@
 
         // ⭐ NEW — check if the value is numeric
         if (!/^[0-9]+$/.test(isbnMap[input])) {
-          resultDiv.textContent = "Please contact Tech Support";
+          resultDiv.textContent = "ISBN  ${input} requres validation and action from Operation. Please contact Tech Support to verify.";
           return;
         }
 
         resultDiv.innerHTML =
           `Please use the replacement ISBN <span class="replacement">${isbnMap[input]}</span> for billing.`;
       } else {
-        resultDiv.textContent = `No replacement ISBN found for ${input}. Please contact Tech Support`;
+        resultDiv.textContent = `No replacement ISBN found for ${input}. Please contact Tech Support.`;
       }
     }
 
@@ -136,4 +136,5 @@
 
 </body>
 </html>
+
 
